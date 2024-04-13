@@ -1,0 +1,169 @@
+@font-face {
+    font-family: 'eightbit';
+    src: url('../fonts/minecraftia-webfont.eot');
+    src: url('../fonts/minecraftia-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/minecraftia-webfont.woff2') format('woff2'),
+         url('../fonts/minecraftia-webfont.woff') format('woff'),
+         url('../fonts/minecraftia-webfont.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+
+}
+
+html,body {
+	overflow: hidden;
+	height: 100vh;
+}
+
+body {
+	padding: 0;
+	margin: 0;
+	background-color: #00acaa;
+}
+
+.frame {
+	position: absolute;
+	left: 50%;
+	 -webkit-transform: translate(-50%, 0);
+  -moz-transform:    translate(-50%, 0);
+  -ms-transform:     translate(-50%, 0);
+  -o-transform:      translate(-50%, 0);
+  transform:         translate(-50%, 0);
+	top: 20;
+	bottom: 0;
+	width: 610px;
+	height: 100%;
+	background-image: url('../images/gameboy.png');
+	background-repeat: no-repeat;
+}
+
+.frame::after {
+	content: "";
+	position: absolute;
+	width: 385px;
+	height: 342px;
+	top: 92px;
+	left: 117px;
+	z-index: 1;
+	overflow: hidden;
+
+	background-color: #000;
+}
+
+canvas#main {
+	position: relative;
+
+	width: 325px;
+	height: 342px;
+
+	top: 92px;
+	left: 148px;
+
+	z-index: 2;
+
+	background-color: #000;
+}
+
+.high-scores {
+	position: absolute;
+	z-index: 1001;
+	width: 100%;
+	height: 100%;
+	background: rgba(253,179,43, .9);
+	font-size: 1.15em;
+	-webkit-transform: translate3d(-100%,0,0);
+	transform: translate3d(-100%,0,0);
+	-webkit-transition: -webkit-transform 0.4s;
+	transition: transform 0.4s;
+	-webkit-transition-timing-function: cubic-bezier(0.7,0,0.3,1);
+	transition-timing-function: cubic-bezier(0.7,0,0.3,1);
+}
+
+.how-to-play {
+	position: absolute;
+	z-index: 1001;
+	width: 100%;
+	height: 100%;
+	background: rgba(253,179,43, .9);
+	font-size: 1.15em;
+	-webkit-transform: translate3d(100%,0,0);
+	transform: translate3d(100%,0,0);
+	-webkit-transition: -webkit-transform 0.4s;
+	transition: transform 0.4s;
+	-webkit-transition-timing-function: cubic-bezier(0.7,0,0.3,1);
+	transition-timing-function: cubic-bezier(0.7,0,0.3,1);
+}
+
+.show-high-scores .high-scores {
+	-webkit-transform: translate3d(0,0,0);
+	transform: translate3d(0,0,0);
+	-webkit-transition: -webkit-transform 0.8s;
+	transition: transform 0.8s;
+	-webkit-transition-timing-function: cubic-bezier(0.7,0,0.3,1);
+	transition-timing-function: cubic-bezier(0.7,0,0.3,1);
+}
+
+.show-how-to-play .how-to-play {
+	-webkit-transform: translate3d(0,0,0);
+	transform: translate3d(0,0,0);
+	-webkit-transition: -webkit-transform 0.8s;
+	transition: transform 0.8s;
+	-webkit-transition-timing-function: cubic-bezier(0.7,0,0.3,1);
+	transition-timing-function: cubic-bezier(0.7,0,0.3,1);
+}
+
+.close-button {
+	width: 48px;
+	height: 48px;
+	position: absolute;
+	right: 1em;
+	top: 1em;
+	overflow: hidden;
+	text-indent: 48px;
+	border: none;
+	z-index: 1001;
+	background: transparent;
+	color: transparent;
+}
+
+.close-button::before,
+.close-button::after {
+	content: '';
+	position: absolute;
+	width: 4px;
+	height: 100%;
+	top: 0;
+	left: 50%;
+	background: #FFF;
+}
+
+.close-button::before {
+	-webkit-transform: rotate(45deg);
+	transform: rotate(45deg);
+}
+
+.close-button::after {
+	-webkit-transform: rotate(-45deg);
+	transform: rotate(-45deg);
+}
+
+.close-button:hover:before, .close-button:hover:after {
+	background: #333;
+	cursor: pointer;
+}
+
+.close-button.small {
+	top: .50em;
+	right: -.25em;
+}
+
+.close-button.small::before,
+.close-button.small::after {
+	height: 16px;
+	background: #000;
+}
+
+.close-button.small:hover:before, .close-button.small:hover:after {
+	background: red;
+	cursor: pointer;
+}

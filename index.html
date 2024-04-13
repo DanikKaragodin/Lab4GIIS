@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+	<meta content="utf-8" http-equiv="encoding">
+	<title>Tetris</title>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="./css/tetris.css">
+	<link rel="stylesheet" href="./css/hs-instructions.css">
+	<style>
+        #second-frame {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1; /* чтобы вторая приставка была поверх первой */
+        }
+		.GameMode{
+			position: absolute;
+			bottom: 2%;
+			display: flex;
+			width: 100%;
+			justify-content: space-evenly;
+			z-index: 3;
+		}
+		.GameMode button{
+			width: 10%;
+			height: 4vh;
+			background-color: #ffd33e;
+			opacity: 0.5;
+			font-family: 'eightbit';
+			color: aliceblue;
+			font-size: 1.15em;
+			transition: all 0.2s;
+			text-shadow: 1px 1px 2px black;
+			border-color: #ffd33e;
+		}
+		.GameMode button:hover{
+			opacity: 1;
+		}
+        #wire {
+            /* display: block;
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0; /* чтобы провод был позади приставок */
+			/* overflow: hidden;
+			object-fit: contain;
+			height: 20%; */
+			display: none;
+			justify-content: center;
+			opacity: 0;
+        }
+    </style>
+</head>
+<body>
+	<div class='how-to-play'>
+		<h3>HOW TO PLAY</h3>
+		<div class="instructions">
+			<div class="row">
+				<p class='control'>
+					<i class="fa fa-arrow-circle-left"></i>
+					<i class="fa fa-arrow-circle-right"></i>
+				</p>
+				<p>Move Pieces Left or Right</p>
+			</div>
+			<div class="row">
+				<p class='control'><i class="fa fa-arrow-circle-up"></i></p>
+				<p>Rotate Piece</p>
+			</div>
+			<div class="row">
+				<p class='control'><i class="fa fa-arrow-circle-down"></i></p>
+				<p>Drop Piece Faster</p>
+			</div>
+			<div class="row">
+				<p class='control'>Space Bar</p>
+				<p>Immediate Drop to the Bottom</p>
+			</div>
+			<div class="row">
+				<p class='control'>ESC</p>
+				<p>Pause Game</p>
+			</div>
+			<div class="row">
+				<p class='control'>Z, X</p>
+				<p>Alternate Piece Rotation Controls</p>
+			</div>
+		</div>
+		<div class="close-button" id="close-how-to-play">Close Menu</div>
+	</div>
+	<div class='high-scores'>
+		<h3>HIGHSCORES</h3>
+		<table>
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody id='hs-list'>
+			</tbody>
+		</table>
+		<div class="close-button" id="close-high-score">Close Menu</div>
+	</div>
+
+    <div id="hs-canvas">
+        <div id="first-frame" class='frame' style="z-index: 2;">
+            <canvas id="main"></canvas>
+        </div>
+        <div id="second-frame" class='frame'>
+            <canvas id="second"></canvas>
+        </div>
+    </div>
+
+    <div id="wire">
+        <img src="images/cable-plug-connector-svgrepo-com.svg" alt="Wire Image">
+    </div>
+
+    <!-- Кнопки для переключения режимов -->
+    <div id="mode-buttons" class="GameMode">
+        <button id="single-mode-button">Single Player</button>
+        <button id="multi-mode-button">Multiplayer</button>
+    </div>
+
+	<div id="hs-modal">
+  	<div class="close-button small" id="close-hs-modal"></div>
+  	<p id='hs-modal-points'><span id='points'></span> POINTS!</p>
+  	<p>Congratulations on your High Score!</p>
+
+  	<p>Enter Three Initials:</p>
+  	<form id="new-hs">
+	  	<p><input type="text" id="name" maxlength="3"></input></p>
+	  	<p><input type="submit" value="SAVE"></input></p>
+  	</form>
+	</div>
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+	<script src="./lib/EPSY.min.js"></script>
+	<script src="./lib/EPSY.CanvasHelper.js"></script>
+	<script src="./lib/howler.min.js"></script>
+	<script src="./lib/handlebars.js"></script>
+	<script src="./js/namespace.js"></script>
+	<script src="./js/sprite.js"></script>
+	<script src="./js/utils.js"></script>
+	<script src="./js/piece.js"></script>
+	<script src="./js/pieces.js"></script>
+	<script src="./js/block.js"></script>
+	<script src="./js/board.js"></script>
+	<script src="./js/menu.js"></script>
+	<script src="./js/game.js"></script>
+	<script src="./js/game_images.js"></script>
+	<script src="./js/particle.js"></script>
+	<script src="./js/bitmapfont.js"></script>
+	<script src="./js/highscores.js"></script>
+	<script src="./js/instructions.js"></script>
+	<script src="./js/audio.js"></script>
+	<script id="hs-template" type="text/x-handlebars-template">
+		<tr>
+			<td>{{name}}</td>
+			<td>{{score}}</td>
+		</tr>
+	</script>
+	<script>
+		var canvasEl = document.getElementsByTagName("canvas")[0];
+    canvasEl.height = 320;
+    canvasEl.width = 304;
+		var tetris = new Tetris.Game(canvasEl);
+	</script>
+
+<script>
+    // Функция для переключения между режимами
+    function toggleMode(isSingleMode) {
+        var singleFrame = document.getElementById('first-frame');
+        var secondFrame = document.getElementById('second-frame');
+        var wire = document.getElementById('wire');
+
+        if (isSingleMode) {
+            singleFrame.style.display = 'block';
+			
+			$(secondFrame).animate({ opacity: 0, left: 50+"%"  }, 1000,function(){secondFrame.style.display = 'none'});
+			$(singleFrame).animate({ left: 50+"%" }, 1000);
+			$(wire).animate({ opacity: 0 }, 1000,function(){wire.style.display = 'none'});
+            
+        } else {
+            singleFrame.style.display = 'block';
+            secondFrame.style.display = 'block'; // Показываем вторую приставку
+            wire.style.display = 'flex'; // Показываем провод
+            // Анимация появления второй приставки
+            secondFrame.style.opacity = 0;
+			$(singleFrame).animate({left: 25+"%"  }, 1000);
+            $(secondFrame).animate({ opacity: 1, left: 75+"%"  }, 1000);
+            // Анимация появления провода
+            $(wire).animate({ opacity: 1 }, 1000);
+        }
+    }
+
+    // Обработчики кликов на кнопки режима
+    document.getElementById('single-mode-button').addEventListener('click', function() {
+        toggleMode(true);
+    });
+
+    document.getElementById('multi-mode-button').addEventListener('click', function() {
+        toggleMode(false);
+    });
+
+    // Ваш код Tetris остается неизменным
+    // var canvasEl = document.getElementsByTagName("canvas")[0];
+    // canvasEl.height = 320;
+    // canvasEl.width = 304;
+    // var tetris = new Tetris.Game(canvasEl);
+</script>
+
+
+</body>
+</html>

@@ -1,0 +1,1325 @@
+pieces.js
+(function(){
+
+	Tetris.LinePiece = function(ctx, board){
+		this.shapes = [
+	    [[0,0,0,0],
+	     [0,0,0,0],
+	     [1,1,1,1]],
+	    [[0,1,0],
+	     [0,1,0],
+	     [0,1,0],
+	     [0,1,0]] 
+		];
+
+		this.offsetx = 13.5;
+		this.offsety = 10.5;
+
+		var opt = { 
+			x: 4, 
+			y: -2,
+			ctx: ctx,
+			board: board,
+			color: Tetris.BLOCKCOLORS.LINE
+		};
+		Tetris.Piece.call(this, opt);
+	}
+
+	Tetris.SquarePiece = function(ctx, board){
+		this.shapes = [
+			[[1,1],
+			 [1,1]]
+		];
+
+		this.offsetx = 14.5;
+		this.offsety = 12;
+
+		var opt = { 
+			x: 5, 
+			y: 0,
+			ctx: ctx,
+			board: board,
+			color: Tetris.BLOCKCOLORS.SQUARE
+		};
+		Tetris.Piece.call(this, opt);
+	}
+
+	Tetris.ZPiece = function(ctx, board){
+		this.shapes = [
+      [[1,1,0],
+       [0,1,1]],
+      [[0,1],
+       [1,1],
+       [1,0]]
+		];
+
+		this.offsetx = 14;
+		this.offsety = 12;	
+
+		var opt = { 
+			x: 4, 
+			y: 0,
+			ctx: ctx,
+			board: board,
+			color: Tetris.BLOCKCOLORS.Z
+		};
+		Tetris.Piece.call(this, opt);
+	}
+
+	Tetris.SPiece = function(ctx, board){
+
+		this.shapes = [
+		 	[[0,1,1],
+	     [1,1,0]],
+	    [[1,0],
+	     [1,1],
+	     [0,1]]
+		];
+
+		this.offsetx = 14;
+		this.offsety = 12;
+
+		var opt = { 
+			x: 4, 
+			y: 0,
+			ctx: ctx,
+			board: board,
+			color: Tetris.BLOCKCOLORS.S
+		};
+		Tetris.Piece.call(this, opt);
+	}
+
+	Tetris.LPiece = function(ctx, board){
+		this.shapes = [
+      [[0,0,0],
+       [1,1,1],
+       [1,0,0]],
+      [[1,1,0],
+       [0,1,0],
+       [0,1,0]],
+      [[0,0,1],
+       [1,1,1],
+       [0,0,0]],
+      [[0,1,0],
+       [0,1,0],
+       [0,1,1]]
+		];
+
+		this.offsetx = 14;
+		this.offsety = 11;
+
+		var opt = { 
+			x: 4, 
+			y: -1,
+			ctx: ctx,
+			board: board,
+			color: Tetris.BLOCKCOLORS.L
+		};
+		Tetris.Piece.call(this, opt);
+	}
+
+	Tetris.JPiece = function(ctx, board){
+		this.shapes = [
+      [[0,0,0],
+       [1,1,1],
+       [0,0,1]],
+      [[0,1,0],
+       [0,1,0],
+       [1,1,0]],
+      [[1,0,0],
+       [1,1,1],
+       [0,0,0]],
+      [[0,1,1],
+       [0,1,0],
+       [0,1,0]]
+		];
+
+		this.offsetx = 14;
+		this.offsety = 11;
+
+		var opt = { 
+			x: 4, 
+			y: -1,
+			ctx: ctx,
+			board: board,
+			color: Tetris.BLOCKCOLORS.J
+		};
+		Tetris.Piece.call(this, opt);
+	}
+
+	Tetris.TPiece = function(ctx, board){
+		this.shapes = [
+      [[0,0,0],
+       [1,1,1],
+       [0,1,0]],
+      [[0,1,0],
+       [1,1,0],
+       [0,1,0]],
+      [[0,1,0],
+       [1,1,1],
+       [0,0,0]],
+      [[0,1,0],
+       [0,1,1],
+       [0,1,0]]		
+		];
+
+		this.offsetx = 14;
+		this.offsety = 11;
+
+		var opt = { 
+			x: 4, 
+			y: -1,
+			ctx: ctx,
+			board: board,
+			color: Tetris.BLOCKCOLORS.T
+		};
+		Tetris.Piece.call(this, opt);
+	}
+
+	Tetris.util.inherits(Tetris.LinePiece, Tetris.Piece);
+	Tetris.util.inherits(Tetris.SquarePiece, Tetris.Piece);
+	Tetris.util.inherits(Tetris.ZPiece, Tetris.Piece);
+	Tetris.util.inherits(Tetris.SPiece, Tetris.Piece);
+	Tetris.util.inherits(Tetris.LPiece, Tetris.Piece);
+	Tetris.util.inherits(Tetris.JPiece, Tetris.Piece);
+	Tetris.util.inherits(Tetris.TPiece, Tetris.Piece);
+
+})();
+piece.js
+(function(){	
+
+	Tetris.Piece = function(opt){
+		this.x = opt.x;
+		this.y = opt.y;
+		this.ctx = opt.ctx;
+		this.board = opt.board;
+		this.color = opt.color;
+		this.current = 0;
+	};
+
+	Tetris.Piece.prototype.draw = function() {
+		var curShape = this.shapes[this.current]
+		var shadow = this.locateLowest();
+
+		for (var row = 0; row < curShape.length; row++){
+			for (var col = 0; col < curShape[row].length; col++ ) {
+				if (curShape[row][col]) {	
+					var block = new Tetris.Block({ color: this.color })
+					var shadowBlock = new Tetris.Block({ color: this.color, shadow: true })
+					
+					shadowBlock.draw(col + shadow[0], row + shadow[1], this.ctx);	
+					block.draw(col + this.x, row + this.y, this.ctx);
+				}
+			}
+		}
+
+	};
+
+	Tetris.Piece.prototype.preview = function() {
+		var curShape = this.shapes[this.current];
+
+		for (var row = 0; row < curShape.length; row++){
+			for (var col = 0; col < curShape[row].length; col++ ) {
+				if (curShape[row][col]) {	
+					var block = new Tetris.Block({ color: this.color })
+					block.draw(col + this.offsetx, row + this.offsety, this.ctx);
+				}
+			}
+		}
+	};
+
+	Tetris.Piece.prototype.rotateRight = function() {
+		var newShape = this.current + 1;
+		if (newShape >= this.shapes.length) { newShape = 0; }
+		if (this.checkCollision(this.x, this.y, newShape)){
+			this.current = newShape;
+		}
+	}
+
+	Tetris.Piece.prototype.rotateLeft = function() {
+		var newShape = this.current - 1;
+		if (newShape < 0) { newShape = this.shapes.length - 1; }
+		if (this.checkCollision(this.x, this.y, newShape)){
+			this.current = newShape;
+		}
+	}
+
+	Tetris.Piece.prototype.move = function() {
+		if (this.checkCollision(this.x, this.y + 1, this.current)){
+			this.y++;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	Tetris.Piece.prototype.drop = function() {
+		var lowest = this.locateLowest();
+		this.y = lowest[1];
+	}
+
+	Tetris.Piece.prototype.moveLeft = function() {
+		if (this.checkCollision(this.x - 1, this.y, this.current)){
+			this.x--;	
+		}
+	}
+
+	Tetris.Piece.prototype.moveRight = function() {
+		if (this.checkCollision(this.x + 1, this.y, this.current)){
+			this.x++;
+		}
+	}
+
+	Tetris.Piece.prototype.checkCollision = function(x,y,cur){
+		var testShape = this.shapes[cur];
+
+		for (var row = 0; row < testShape.length; row++){
+			for (var col = 0; col < testShape[row].length; col++ ) {
+				if (col + x > Tetris.BOARD_WIDTH - 1) { continue; }
+				if (row + y > Tetris.BOARD_HEIGHT - 1 || row + y < 0) { continue; }
+				if (testShape[row][col]) {	
+					if (this.board.get(col + x, row + y).color){
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	};
+
+	Tetris.Piece.prototype.height = function(){
+		var testShape = this.shapes[this.current]
+		var height = 0;
+		
+		for(var y = 0; y < testShape.length; y++){
+			if (testShape[y].indexOf(1) != -1) { height++; }
+		}
+		return height;
+	};
+
+	Tetris.Piece.prototype.locateLowest = function(){
+
+		var testShape = this.shapes[this.current]
+		var lowestRow = Tetris.BOARD_HEIGHT - 1 - this.height();
+		hitY = null;
+
+		hitY = lowestRow;
+		for (var y = this.y+1; y <= lowestRow; y++){
+			if (!this.checkCollision(this.x, y, this.current)){
+				hitY = y - 1;
+				break;
+			}
+			hitY = y;
+		}
+
+		return [this.x, hitY];
+	}
+	
+})();
+particle.js
+(function(){
+
+  Tetris.ParticleEffects = function(opt){
+    this.ctx = opt.ctx;
+    this.emitters = [];
+    this.canvasHelper = new EPSY.CanvasHelper(this.ctx);
+
+    this.blockConfig = new Array(4);
+    this.initBlockConfig();
+
+    this.explodeConfig = new Array(4);
+    this.initExplodeConfig();
+
+    this.initGalaxyConfig();
+    this.infiniteLoop = false;
+
+    this.blockCount = 0;
+  }
+
+  Tetris.ParticleEffects.prototype.initGalaxyConfig = function(){
+    this.galaxy = [{"pos":{"x":0,"y":0},"posVar":{"x":10,"y":0},"speed":60,"speedVar":10,"angle":90,"angleVar":360,"life":4,"lifeVar":1,"radius":40,"radiusVar":10,"textureAdditive":true,"startScale":2,"startScaleVar":0,"endScale":2,"endScaleVar":0,"startColor":[30,63,193,1],"startColorVar":[0,0,0,0],"endColor":[0,0,0,1],"endColorVar":[0,0,0,0],"colorList":[],"gravity":{"x":0,"y":0},"radialAccel":-80,"radialAccelVar":0,"tangentialAccel":80,"tangentialAccelVar":0,"texture":"./images/particle.png","totalParticles":200,"emissionRate":50,"xEquation":"","yEquation":"","textureEnabled":true,"active":true,"duration":null,"id":"title","aFactor":{"x":0,"y":0},"xFactor":{"x":0,"y":0},"border":{"top":200,"left":200,"bottom":200,"right":200},"zIndex":0}]
+  }
+
+  Tetris.ParticleEffects.prototype.initBlockConfig = function(){
+    for(var i = 0; i < 4; i++ ){
+      this.blockConfig[i] = [{"pos":{"x":0,"y":0},"posVar":{"x":8,"y":0},"speed":1,"speedVar":0,"angle":0,"angleVar":0,"life":0.7,"lifeVar":0,"radius":4,"radiusVar":0,"textureAdditive":true,"startScale":.9,"startScaleVar":0,"endScale":.9,"endScaleVar":0,"startColor":[66,70,119,.4],"startColorVar":[0,0,0,0],"endColor":[0,0,0,0],"endColorVar":[0,0,0,0],"colorList":[],"gravity":{"x":0,"y":-200},"radialAccel":0,"radialAccelVar":0,"tangentialAccel":0,"tangentialAccelVar":0,"texture":"./images/particle.png","totalParticles":25,"emissionRate":25,"xEquation":"","yEquation":"","textureEnabled":true,"active":true,"duration":null,"id":"landblock","aFactor":{"x":0,"y":0},"xFactor":{"x":0,"y":0}, "zIndex":1}];
+    }
+  };
+
+  Tetris.ParticleEffects.prototype.initExplodeConfig = function(){
+    for(var i = 0; i < 4; i++){
+      this.explodeConfig[i] = [{"pos":{"x":0,"y":0},"posVar":{"x":160,"y":16},"speed":20,"speedVar":0,"angle":90,"angleVar":20,"life":1,"lifeVar":0,"radius":10,"radiusVar":0,"textureAdditive":false,"startScale":2.5,"startScaleVar":0,"endScale":2.5,"endScaleVar":0,"startColor":[255,255,255,.4],"startColorVar":[0,0,0,0],"endColor":[0,0,0,0],"endColorVar":[0,0,0,0],"colorList":[],"gravity":{"x":0,"y":500},"radialAccel":0,"radialAccelVar":0,"tangentialAccel":0,"tangentialAccelVar":0,"texture":"./images/particle.png","totalParticles":50,"emissionRate":250,"xEquation":"","yEquation":"","textureEnabled":false,"active":true,"duration":null,"cycles":1, "id":"rowexplode","aFactor":{"x":0,"y":0},"xFactor":{"x":0,"y":0},"border":{"top":400,"left":200,"bottom":200,"right":200},"zIndex":1}]
+    }
+  }
+
+  Tetris.ParticleEffects.prototype.addGalaxyEmitter = function(x,y){    ;
+    this.canvasHelper.loadSystem(this.galaxy, x, y);
+  };
+
+  Tetris.ParticleEffects.prototype.updateState = function(){
+    if ( this.blockCount > 0) { this.blockCount--; }
+    if (!this.blockCount && this.canvasHelper.emitters.length){ 
+      this.removeBlockEmitters(); };
+  }
+
+  Tetris.ParticleEffects.prototype.draw = function(){
+    if (!this.infiniteLoop) this.updateState();
+    this.canvasHelper.draw();
+  };
+
+  Tetris.ParticleEffects.prototype.addExplosions = function(rows){
+    this.removeBlockEmitters();
+    this.initExplodeConfig();
+
+    var e = 0;
+    for (var i=0; i < rows.length; i++){
+      this.addExplosion(i,e)
+      e++;
+    }
+  };
+
+  Tetris.ParticleEffects.prototype.addExplosion = function(row, e){    
+    var px = Tetris.TILESIZE;
+    var py = y * Tetris.TILESIZE;
+    this.canvasHelper.loadSystem(this.explodeConfig[e], px, py);
+  };
+
+  Tetris.ParticleEffects.prototype.addBlockEmitters = function(positions){
+    this.removeBlockEmitters();
+    this.initBlockConfig(); 
+
+    var e = 0;
+    for (var i=0; i < positions.length; i++){
+      this.addBlockEmitter(positions[i][1], positions[i][0], e);
+      e++;
+    }
+
+    this.blockCount = Tetris.BP_DURATION;
+  };
+
+  Tetris.ParticleEffects.prototype.addBlockEmitter = function(x,y,e){    
+    var px = x * Tetris.TILESIZE + Tetris.TILESIZE/2;
+    var py = y * Tetris.TILESIZE - 1;
+    this.canvasHelper.loadSystem(this.blockConfig[e], px, py);
+  };
+
+  Tetris.ParticleEffects.prototype.add = function(piece){
+    var curShape = piece.shapes[piece.current]
+    var positions = []
+
+    for (var row = 0; row < curShape.length; row++){
+      for (var col = 0; col < curShape[row].length; col++ ) {
+        if (row == 0 && curShape[row][col]) {
+          positions.push([row + piece.y, col + piece.x])
+        } else if (row && !curShape[row-1][col] && curShape[row][col]) {
+          positions.push([row + piece.y, col + piece.x])
+        }
+      }
+    }
+
+    this.addBlockEmitters(positions);
+  };
+
+  Tetris.ParticleEffects.prototype.removeBlockEmitters = function(){
+    this.canvasHelper.emitters = [];
+  };
+
+  Tetris.ParticleEffects.prototype.stop = function(){
+    this.removeBlockEmitters();
+    this.blockCount = 0;
+  }
+  
+})();
+namespace.js
+(function(){
+
+	if (typeof window.Tetris === "undefined") {
+		window.Tetris = {};
+	}
+
+	Tetris.TILESIZE = 16;
+	Tetris.BOARD_HEIGHT = 20;
+	Tetris.BOARD_WIDTH = 12;
+
+	Tetris.EMPTY = 0;
+
+	Tetris.BLOCKCOLORS = {
+	  'L' 			: 1,
+	  'J' 			: 2,
+	  'LINE' 		: 3,
+	  'S' 			: 4,
+	  'Z' 			: 5,
+	  'SQUARE'	: 6,
+	  'T'				: 7
+  };
+
+  Tetris.BORDER_BLOCK = 9;
+
+  Tetris.LBlocks = [];
+  Tetris.JBlocks = [];
+  Tetris.LineBlocks = [];
+  Tetris.SquareBlocks = [];
+  Tetris.ZBlocks = [];
+  Tetris.SBlocks = [];
+  Tetris.TBlocks = [];
+
+  /* Key Codes */
+  Tetris.LEFT = 37;
+  Tetris.UP = 38;
+  Tetris.RIGHT = 39;
+  Tetris.DOWN = 40;
+  Tetris.Z = 122;
+  Tetris.X = 120;
+  Tetris.DROP = 32;
+  Tetris.ESC = 27;
+
+  /* Speeds */
+  Tetris.FASTMOVE = 3;
+  Tetris.LEVEL = [30, 20, 15, 12, 10, 6, 5];
+  Tetris.LEVELUP = 16;
+
+  /* Particles */
+  Tetris.BP_DURATION = 32;
+
+  /* Animations */
+  Tetris.FLASH_DURATION = 4 * 4;
+	
+})();
+menu.js
+(function(){
+
+	Tetris.Menu = function(opt){
+		this.game = opt.game;
+		this.ctx = opt.game.ctx;
+		this.choice = 0;
+
+		var that = this;
+
+		$('#close-high-score').click(function(){
+			that.game.audio.whoosh.play();
+			Tetris.hideHighScores();
+		});
+		
+		$('#close-how-to-play').click(function(){
+			that.game.audio.whoosh.play();
+			Tetris.hideHowToPlay();
+		});
+	};
+
+	Tetris.Menu.prototype.run = function(){
+		this.game.wipeBg();
+		this.galaxyHandler();
+		this.draw();
+		if (!this.keyHandler()) return;
+  	requestAnimationFrame(this.run.bind(this));
+	};
+
+	Tetris.Menu.prototype.galaxyHandler = function(){
+		if (this.game.particles.infiniteLoop) {
+			this.game.particles.draw();
+		} else {
+			this.game.particles.removeBlockEmitters();
+			this.game.particles.infiniteLoop = true;
+			this.game.particles.initGalaxyConfig();
+			this.game.particles.addGalaxyEmitter(145,110);
+		}
+	};
+
+	Tetris.Menu.prototype.showingPopUp = function(){
+		return ($('body').hasClass('show-high-scores') || 
+						$('body').hasClass('show-how-to-play') ||
+						$('body').hasClass('modal-active'))
+	};
+
+	Tetris.Menu.prototype.keyHandler = function(){
+		if (this.showingPopUp()) {
+			this.game.keysDown = {};
+			return true; 
+		}
+		
+		for(var key in this.game.keysDown) {
+			$('canvas').css( 'cursor', 'default' );
+
+			if ( key != Tetris.UP && key != Tetris.DOWN) {
+				if (!this.choice){
+					this.game.particles.infiniteLoop = false;
+					this.game.particles.removeBlockEmitters();
+					this.game.audio.start.play();
+					this.game.initNewGame();	
+					return false;	
+				} else if (this.choice == 1) {
+					this.game.audio.whoosh.play();
+					Tetris.showHighScores();
+				} else if (this.choice == 2) {
+					this.game.audio.whoosh.play();
+					Tetris.showHowToPlay();
+				}
+			}
+		}
+
+		this.game.keysDown = {};
+  	return true;
+	};
+
+	Tetris.Menu.prototype.clickHandler = function(e){
+		var coords = this.getRelativeCoords(e);
+		if (this.coordsWithinBounds(coords,75,172,150,25) ||
+			  this.coordsWithinBounds(coords,75,200,150,25) || 
+			  this.coordsWithinBounds(coords,75,231,150,25)){
+			this.game.keysDown[Tetris.DROP] = true;
+		} else {
+			this.game.keysDown[Tetris.UP] = true;
+		}
+	};
+
+	Tetris.Menu.prototype.mouseMoveHandler = function(e){
+		var coords = this.getRelativeCoords(e);
+
+		if (this.coordsWithinBounds(coords,75,172,150,25)){
+			if (this.choice != 0) this.game.audio.select.play();
+			this.choice = 0;
+			$('canvas').css( 'cursor', 'pointer' );
+		} else if (this.coordsWithinBounds(coords,75,200,150,25)){
+			if (this.choice != 1) this.game.audio.select.play();
+			this.choice = 1;
+			$('canvas').css( 'cursor', 'pointer' );
+		} else if (this.coordsWithinBounds(coords,75,231,150,25)) {
+			if (this.choice != 2) this.game.audio.select.play();
+			this.choice = 2;
+			$('canvas').css( 'cursor', 'pointer' );
+		} else {
+			$('canvas').css( 'cursor', 'default' );
+		}
+	};
+
+	Tetris.Menu.prototype.coordsWithinBounds = function(coords, topLeftX, topLeftY, width, height){
+		var x,y;
+		x = coords[0];
+		y = coords[1];
+
+		if ( x >= topLeftX && x <= topLeftX + width &&
+			   y >= topLeftY && y <= topLeftY + height){
+			return true;
+		}
+		return false;
+	};
+
+	Tetris.Menu.prototype.getRelativeCoords = function(e){
+		var clickedX, clickedY;
+		canoffset = $('canvas').offset();
+		clickedX = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft - Math.floor(canoffset.left);
+		clickedY = e.clientY + document.body.scrollTop + document.documentElement.scrollTop - Math.floor(canoffset.top) + 1;
+		clickedX = Math.floor(clickedX * .935);
+		clickedY = Math.floor(clickedY * .935);
+		return [clickedX, clickedY]
+	}
+
+	Tetris.Menu.prototype.draw = function(){
+		Tetris.BMF.write("super", 135, 65, 'bubble', this.ctx, 'center');
+		Tetris.BMF.write("TETRIS", 135, 105, 'bubble', this.ctx, 'center');
+
+		if (this.choice == 0) { 
+			this.ctx.fillStyle = "rgb(253,179,43)";
+      this.ctx.fillRect (75,172,150,25);
+      Tetris.BMF.write("start game", 146, 176, 'eightbit', this.ctx, 'center');
+			Tetris.BMF.write("start game", 145, 175, 'eightbit_w', this.ctx, 'center');
+			Tetris.BMF.write("high scores", 145, 205, 'eightbit_w', this.ctx, 'center');
+			Tetris.BMF.write("how to play", 145, 235, 'eightbit_w', this.ctx, 'center');
+		} else if (this.choice == 1) {
+			this.ctx.fillStyle = "rgb(253,179,43)";
+      this.ctx.fillRect (75,200,150,25);
+			Tetris.BMF.write("start game", 145, 175, 'eightbit_w', this.ctx, 'center');
+			Tetris.BMF.write("high scores", 146, 206, 'eightbit', this.ctx, 'center');
+			Tetris.BMF.write("high scores", 145, 205, 'eightbit_w', this.ctx, 'center');
+			Tetris.BMF.write("how to play", 145, 235, 'eightbit_w', this.ctx, 'center');
+		} else if (this.choice == 2) {
+			this.ctx.fillStyle = "rgb(253,179,43)";
+      this.ctx.fillRect (75,231,150,25);
+			Tetris.BMF.write("start game", 145, 175, 'eightbit_w', this.ctx, 'center');
+			Tetris.BMF.write("high scores", 145, 205, 'eightbit_w', this.ctx, 'center');
+			Tetris.BMF.write("how to play", 146, 236, 'eightbit', this.ctx, 'center');
+			Tetris.BMF.write("how to play", 145, 235, 'eightbit_w', this.ctx, 'center');
+		}
+		
+	}
+
+})();
+loadimages.js
+(function(){
+
+  Tetris.Sprite = function(img, x, y, width, height) {
+    this.img = img;
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+  };
+
+  Tetris.Sprite.prototype.draw = function(ctx, x, y) {
+    var width = Math.max(1, this.width);
+    var height = Math.max(1, this.height);
+    ctx.drawImage(this.img, this.x, this.y, width, height,
+      x, y, width, height);
+  };
+
+  Tetris.Sprite.prototype.drawTransparent = function(ctx, x, y) {
+    ctx.globalAlpha = 0.3;
+    ctx.drawImage(this.img, this.x, this.y, this.width, this.height,
+      x, y, this.width, this.height);
+    ctx.globalAlpha = 1;
+  };
+
+  Tetris.initBG = function(img) {
+    Tetris.bg = new Tetris.Sprite(img, 0, 0, 304, 320);
+  };
+
+  Tetris.initTiles = function(img) {
+    arr = [
+      new Tetris.Sprite(img, 0, 0, Tetris.TILESIZE, Tetris.TILESIZE),
+      new Tetris.Sprite(img, 16, 0, Tetris.TILESIZE, Tetris.TILESIZE),
+      new Tetris.Sprite(img, 32, 0, Tetris.TILESIZE, Tetris.TILESIZE),
+      new Tetris.Sprite(img, 48, 0, Tetris.TILESIZE, Tetris.TILESIZE)
+    ]
+
+    return arr;
+  };
+
+  Tetris.initMainTiles = function(img) {
+    Tetris.borderBlock = new Tetris.Sprite(img, 0, 0, Tetris.TILESIZE, Tetris.TILESIZE);
+    Tetris.bgBlock = new Tetris.Sprite(img, 16, 0, Tetris.TILESIZE, Tetris.TILESIZE);
+  };
+
+})();
+game_images.js
+(function(){
+
+	Tetris.Game.prototype.loadImages = function(){
+		
+		var blocks = Array.apply(null, Array(7)).map(function() { return new Image() });
+		var mainImg = new Image();
+		var bgImg = new Image();
+
+		this.allImages = blocks.concat(blocks).concat(mainImg).concat(bgImg);
+
+		for ( var i = 0; i < blocks.length; i++ ){
+			blocks[i].onload = (function(e) {
+				switch ($(e.target).attr('src')){
+					case "images/block-l.png":
+						Tetris.LBlocks = Tetris.initTiles(e.target);
+						break;
+					case "images/block-j.png":
+						Tetris.JBlocks = Tetris.initTiles(e.target);
+						break;
+					case "images/block-line.png":
+						Tetris.LineBlocks = Tetris.initTiles(e.target);
+						break;
+					case "images/block-s.png":
+						Tetris.SBlocks = Tetris.initTiles(e.target);
+						break;
+					case "images/block-z.png":
+						Tetris.ZBlocks = Tetris.initTiles(e.target);
+						break;
+					case "images/block-square.png":
+						Tetris.SquareBlocks = Tetris.initTiles(e.target);
+						break;
+					case "images/block-t.png":
+						Tetris.TBlocks = Tetris.initTiles(e.target);
+						break;
+				}
+  		}).bind(this);
+		}
+
+  	bgImg.onload = (function(){
+  		Tetris.initBG(bgImg);
+  	}).bind(this);
+  	
+  	mainImg.onload = (function(){
+  		Tetris.initMainTiles(mainImg);
+  		if (this.allImagesLoaded) {
+  			this.audio.music.play();
+  			this.menu.run();	
+  		}
+
+  	}).bind(this);
+
+		blocks[0].src = "images/block-l.png"
+		blocks[1].src = "images/block-j.png"
+		blocks[2].src = "images/block-line.png"
+		blocks[3].src = "images/block-s.png"
+		blocks[4].src = "images/block-z.png"
+		blocks[5].src = "images/block-square.png"
+		blocks[6].src = "images/block-t.png"
+		bgImg.src = "images/bg.png"
+		mainImg.src = "images/maintiles.png"		
+	};
+
+	Tetris.Game.prototype.allImagesLoaded = function(){
+		var num = this.allImages.length;
+		var count = 0;
+
+		this.allImagesLoaded.forEach(function(image){
+			if (image.complete) { count++; }
+		});
+
+		if (count == num &&
+			  Tetris.BMF.fonts['eightbit'] &&
+			  Tetris.BMF.fonts['eightbit_w'] &&
+			  Tetris.BMF.fonts['bubble']) { return true; }
+
+		return false;
+	}
+
+})();
+game.js
+(function(){
+
+	Tetris.Game = function(canvas){
+		this.ctx = canvas.getContext("2d");
+
+		this.particles = new Tetris.ParticleEffects({ctx: this.ctx});
+		this.board = new Tetris.Board({ ctx: this.ctx, particles: this.particles, game: this });
+		this.audio = new Tetris.Audio();
+	
+		this.history = [
+			Math.floor(Math.random()*7),
+			Math.floor(Math.random()*7),
+			Math.floor(Math.random()*7),
+			Math.floor(Math.random()*7)
+		];
+
+		this.keysDown = {};
+		this.bindListeners();
+		this.gameOver = true;
+		this.menu = new Tetris.Menu({game: this});
+
+		this.initHighScores();
+		this.loadImages();
+	};
+
+	Tetris.Game.prototype.generatePiece = function(){
+		
+		var selected = -1
+
+		while (selected < 0 || this.history.indexOf(selected) >= 0 ){
+			selected = Math.floor(Math.random()*7);	
+		}
+
+		this.history.push(selected);
+		this.history.shift();
+		
+		switch(selected){
+			case 0:
+			this.nextPiece = new Tetris.LPiece(this.ctx, this.board);
+			break;
+			case 1:
+			this.nextPiece = new Tetris.JPiece(this.ctx, this.board);
+			break;
+			case 2:
+			this.nextPiece = new Tetris.LinePiece(this.ctx, this.board);
+			break;
+			case 3:
+			this.nextPiece = new Tetris.SPiece(this.ctx, this.board);
+			break;
+			case 4:
+			this.nextPiece = new Tetris.ZPiece(this.ctx, this.board);
+			break;
+			case 5:
+			this.nextPiece = new Tetris.SquarePiece(this.ctx, this.board);
+			break;
+			case 6:
+			this.nextPiece = new Tetris.TPiece(this.ctx, this.board);
+			break;
+		}
+	};
+
+	Tetris.Game.prototype.getNextPiece = function(){
+		this.curPiece = this.nextPiece;
+	};
+
+	Tetris.Game.prototype.initNewGame = function(){
+		this.gameOver = false;
+		this.gameOverCounter = 0;
+
+		this.wipeBg();
+		this.board.initBoard();
+
+		this.nextPiece = null;
+		this.curPiece = null;
+		this.generatePiece();
+		this.getNextPiece();
+		this.generatePiece();
+
+		this.level = 0;
+		this.nextLevelCount = Tetris.LEVELUP;
+		this.speed = Tetris.LEVEL[this.level];
+		this.moveCounter = 0;
+		
+		this.fastmove = false;
+		this.fastmoveEnabled = true;
+		this.keysDown = {};
+
+		this.score = 0;
+		this.paused = false;
+
+		requestAnimationFrame(this.play.bind(this));
+	};
+
+ 	Tetris.Game.prototype.bindListeners = function(){
+    var that = this;
+    $(window).keypress(function(event){
+    	that.keysDown[event.keyCode] = true;
+    });
+
+    $(window).keydown(function(event){
+      that.keysDown[event.keyCode] = true;
+    });
+
+    $(window).keyup(function(event){
+    	if (that.gameOver){
+    		if (event.keyCode == Tetris.DOWN) { 
+    			that.audio.select.play();
+    			that.menu.choice += 1;
+    			if (that.menu.choice > 2) that.menu.choice = 0;
+    		} else if (event.keyCode == Tetris.UP) {
+    			that.audio.select.play();
+    			that.menu.choice -= 1;
+    			if (that.menu.choice < 0) that.menu.choice = 2;
+    		}
+    	} else {
+	    	if (event.keyCode == Tetris.DOWN || event.keyCode == Tetris.DROP) { 
+	    		that.fastmove = false;
+	    		that.fastmoveEnabled = true;
+	    		that.moveCounter = 0; 
+	    	}
+	      delete that.keysDown[event.keyCode];
+    	}
+    });
+
+    $('#main').click(function (e) {
+    	if (that.gameOver) that.menu.clickHandler(e); 
+		});
+
+		$('#main').on('mousemove', function(e){
+			if (that.gameOver) that.menu.mouseMoveHandler(e);
+		})
+
+  };
+
+  Tetris.Game.prototype.initHighScores = function(){
+  	Tetris.populateHighScores();
+		$('#close-hs-modal').click(Tetris.closeHighScoreModal);
+		$('#new-hs').submit(Tetris.saveHighScore);
+  };
+
+	Tetris.Game.prototype.play = function() {
+		
+		if (!this.gameOver){
+			this.clearBg();
+			this.board.draw();
+			this.particles.draw();
+			this.showScore();
+			this.showLevel();
+			this.nextPiece.preview();
+			this.keyHandler();
+
+			if (!this.paused){
+				if (!this.board.exploding()){
+					this.curPiece.draw();
+					this.moveCounter++;
+					if (this.moveCounter > 60) { this.moveCounter = 1; }		
+					
+
+					if (this.fastmove) {
+						if ( this.moveCounter % Tetris.FASTMOVE == 0 ) { 
+							this.attemptBlockMove();
+						}
+					} else {
+						if ( this.moveCounter % this.speed == 0 ) { 
+							this.attemptBlockMove();
+						}
+					}
+				}
+			} else {
+				this.curPiece.draw();
+				this.showPause();
+			}
+
+			requestAnimationFrame(this.play.bind(this));
+		}
+	};
+
+	Tetris.Game.prototype.wipeBg = function() {
+		this.ctx.fillStyle = 'rgba(0,0,0,1)';
+		this.ctx.fillRect(0,0, 304, 320);
+	};
+
+	Tetris.Game.prototype.showPause = function(){
+		this.ctx.fillStyle = 'rgba(50,11,11,0.5)';
+		this.ctx.fillRect(0,0, 304, 320);
+		Tetris.BMF.write("Paused", 135, 135, 'bubble', this.ctx, 'center');
+	};
+
+	Tetris.Game.prototype.showGameOver = function(){
+  	if (this.gameOverCounter < 10){
+  		this.gameOverCounter++;
+  		this.ctx.fillStyle = 'rgba(50,11,11,0.1)';
+  		this.ctx.fillRect(0,0, 304, 320);
+  		Tetris.BMF.write("Game", 195, 105, 'bubble', this.ctx, 'right');
+  		Tetris.BMF.write("Over", 195, 150, 'bubble', this.ctx, 'right');
+  	}
+
+  	if (Object.keys(this.keysDown).length > 0 && this.gameOverCounter >= 10) {
+  		this.keysDown = {};
+  		if ( this.score > Tetris.minForHS() ){
+  			Tetris.openHighScoreModal(this.score);	
+  		}
+			this.menu.run();
+  		return;
+  	}
+
+  	requestAnimationFrame(this.showGameOver.bind(this));
+	};
+
+	Tetris.Game.prototype.clearBg = function(){
+		this.wipeBg();
+		Tetris.bg.draw(this.ctx, 0, 0);
+	};
+
+	Tetris.Game.prototype.showScore = function(){
+  	var strScore = this.score.toString();
+  	Tetris.BMF.write(strScore, 275, 45, 'eightbit', this.ctx, 'right');
+	}
+
+	Tetris.Game.prototype.showLevel = function(){
+  	var strLevel = (this.level + 1).toString();
+  	Tetris.BMF.write(strLevel, 275, 105, 'eightbit', this.ctx, 'right');
+	}
+
+	Tetris.Game.prototype.attemptBlockMove = function() {
+		var canMove = true;
+		canMove = this.curPiece.move();
+		if (!canMove){ 
+			this.landBlock(); 
+			return false;
+		}
+		return true;
+	};
+
+	Tetris.Game.prototype.dropBlock = function(){
+		this.curPiece.drop();
+		this.landBlock();
+	}
+
+	Tetris.Game.prototype.landBlock = function() {
+		if (!this.board.add(this.curPiece)){
+			this.gameOver = true;
+			this.particles.stop();
+			this.audio.music.stop();
+			this.audio.gameover.play();
+			this.showGameOver();
+		}
+
+		if (this.fastmove) { 
+			this.particles.add(this.curPiece); 
+			this.fastmove = false;
+			this.fastmoveEnabled = false;
+			this.audio.forceHit.play();
+		} else {
+			this.audio.slowHit.play();
+		}
+		
+		this.board.update();
+		this.getNextPiece();
+		this.generatePiece();
+	};
+
+	Tetris.Game.prototype.updateLevel = function(n){
+		if (this.level == Tetris.LEVEL.length - 1) { return; }
+
+		this.nextLevelCount -= n;
+
+		if (this.nextLevelCount <= 0){
+			this.nextLevelCount = Tetris.LEVELUP;
+			this.level += 1;
+			this.speed = Tetris.LEVEL[this.level];
+		}
+	};
+
+	Tetris.Game.prototype.keyHandler = function(){
+		
+		for(var key in this.keysDown) {
+			if (this.paused && key != Tetris.ESC) continue;
+
+			if ( key == Tetris.Z) {
+				this.curPiece.rotateLeft();
+			} else if (key == Tetris.X) {
+				this.curPiece.rotateRight();
+			} else if (key == Tetris.UP){
+				this.audio.blockRotate.play();
+				this.curPiece.rotateRight();
+			} else if (key == Tetris.LEFT){
+				this.curPiece.moveLeft();
+			} else if (key == Tetris.RIGHT){
+				this.curPiece.moveRight();
+			} else if (key == Tetris.ESC){
+				this.audio.pause.play();
+				this.paused = this.paused ? false : true;
+				if (this.paused) {
+					this.audio.music.pause();
+				} else {
+					this.audio.music.play();
+				}
+			} else if (key == Tetris.DOWN && this.fastmoveEnabled){
+				this.fastmove = true;
+			} else if (key == Tetris.DROP && this.fastmoveEnabled){
+				this.fastmove = true;
+				this.dropBlock();
+			}
+		}
+
+		this.keysDown = {};
+	};
+
+})();
+board.js
+(function(){
+
+	Tetris.Board = function(opt){
+
+		this.ctx = opt.ctx;
+		this.particles = opt.particles;
+		this.game = opt.game;
+
+		this.grid = new Array(Tetris.BOARD_HEIGHT);
+		for(var row = 0; row < Tetris.BOARD_HEIGHT; row++) {
+			this.grid[row] = new Array(Tetris.BOARD_WIDTH);
+			for(var col = 0; col < Tetris.BOARD_WIDTH; col++) {
+				this.grid[row][col] = new Tetris.Block({color: Tetris.EMPTY});
+			}
+		}
+
+		this.initBorders();
+		this.completed = [];
+	};
+
+	Tetris.Board.prototype.initBoard = function(){
+		for(var row = 0; row < Tetris.BOARD_HEIGHT; row++) {
+			for(var col = 0; col < Tetris.BOARD_WIDTH; col++) {
+				this.grid[row][col].color = Tetris.EMPTY;
+			}
+		}
+
+		this.initBorders();
+	};
+
+	Tetris.Board.prototype.clear = function(x,y){
+		this.grid[y][x].color = Tetris.EMPTY;
+	}
+
+	Tetris.Board.prototype.get = function(x,y) {
+		return this.grid[y][x];
+	};
+
+	Tetris.Board.prototype.set = function(x,y,c) {
+		this.grid[y][x].color = c;
+	};
+
+	Tetris.Board.prototype.add = function(piece) {
+		var curShape = piece.shapes[piece.current]
+
+		for (var row = 0; row < curShape.length; row++){
+			for (var col = 0; col < curShape[row].length; col++ ) {
+				if (curShape[row][col]) {
+					if ( (row + piece.y) < 0 ) { return false; }
+					
+					if (this.get(col + piece.x, row + piece.y).color == Tetris.EMPTY) {	
+						this.set( col + piece.x, row + piece.y, piece.color);
+						this.get( col + piece.x, row + piece.y).counter = Tetris.FLASH_DURATION;
+					} else {
+						return false;
+					}
+				}
+			}
+		}
+
+		return true;
+	};
+
+	Tetris.Board.prototype.initBorders = function(){
+		for(var x = 0; x < Tetris.BOARD_WIDTH; x++ ){
+			this.set(x, Tetris.BOARD_HEIGHT - 1, Tetris.BORDER_BLOCK);
+		}
+
+		for(var y = 0; y < Tetris.BOARD_HEIGHT; y++ ){
+			this.set(0, y, Tetris.BORDER_BLOCK);
+			this.set(Tetris.BOARD_WIDTH - 1, y, Tetris.BORDER_BLOCK);
+		}
+	};
+
+	Tetris.Board.prototype.draw = function() {
+		if (!this.exploding() && this.completed.length) { 
+			this.removeCompletedRows(); 
+		}
+		
+		for(var y = 0; y < Tetris.BOARD_HEIGHT; y++){
+			for(var x = 0; x < Tetris.BOARD_WIDTH; x++){
+				this.get(x,y).draw(x,y, this.ctx);
+			}
+		}
+	};
+
+	Tetris.Board.prototype.update = function() {
+		completed = []
+
+		for (var row = 0; row < Tetris.BOARD_HEIGHT - 1; row++){
+			var complete = true
+			for (var col = 1; col < Tetris.BOARD_WIDTH - 1; col++){
+				if (!this.get(col, row).color) {
+					complete = false;
+				}
+			}
+			if (complete) { completed.push(row) }
+		}
+
+		if (completed.length){
+			this.animateCompletedRows(completed);
+		}
+
+	};
+
+	Tetris.Board.prototype.animateCompletedRows = function(completed) {
+		this.particles.removeBlockEmitters();
+
+		for(i=0; i < completed.length; i++){
+			y = completed[i];
+
+			for(x=0; x < Tetris.BOARD_WIDTH - 1; x++){
+				this.get(x, y).explodeAnimation = true;
+				this.get(x, y).counter = Tetris.FLASH_DURATION;
+			}	
+		}
+
+		this.completed = this.completed.concat(completed);
+		this.updateScore(completed.length);
+	};
+
+	Tetris.Board.prototype.updateScore = function(n){
+		switch(n){
+			case 1:
+				this.game.score += 1;
+				break;
+			case 2:
+				this.game.score += 3;
+				break;
+			case 3:
+				this.game.score += 5;
+				break;
+			case 4:
+				this.game.score += 8;
+				break;
+		}
+
+		this.game.updateLevel(n);
+	};
+
+	Tetris.Board.prototype.removeCompletedRows = function(){
+		for(i=0; i < this.completed.length; i++){
+			this.remove(this.completed[i]); 	
+		}
+
+		this.particles.addExplosions(this.completed);
+		this.particles.blockCount = Tetris.FLASH_DURATION * 2;
+		this.game.audio.lineDrop.play(); 
+		this.game.audio.lineRemove.play();
+		if (this.completed.length == 4) { this.game.audio.tetris.play(); }		
+		this.completed = [];
+	};
+
+	Tetris.Board.prototype.exploding = function(){
+		for (var y = Tetris.BOARD_HEIGHT - 2; y >= 0; y--){
+			for (var x = 1; x < Tetris.BOARD_WIDTH - 1; x++){
+				if (this.get(x, y).explodeAnimation) { return true; }
+			}
+		}
+
+		return false;
+	};
+
+	Tetris.Board.prototype.remove = function(row) {
+		for (var y = row; y >= 1; y--){
+			for (var x = 1; x < Tetris.BOARD_WIDTH - 1; x++){
+				this.set(x,y, this.get(x,y - 1).color);
+			}
+		}
+	};
+
+})();
+block.js
+(function(){
+
+	Tetris.Block = function(opt) {
+		this.color = opt.color;
+    this.state = 0;
+    this.counter = 0;
+    this.explodeAnimation = false;
+    this.shadow = opt.shadow || false;
+    this.isSuper =  true || false
+	};
+
+	Tetris.Block.prototype.draw = function(x, y, ctx) {
+		var px = x * Tetris.TILESIZE;
+		var py = y * Tetris.TILESIZE;
+    this.updateState();
+    if (!this.shadow){
+		  this.getSprite().draw(ctx, px, py);
+    } else {
+      this.getSprite().drawTransparent(ctx, px, py);
+    }
+	};
+
+  Tetris.Block.prototype.updateState = function(){
+      if ( this.counter > 0) { this.counter--; }
+      else { this.explodeAnimation = false; }
+      
+      this.state = Math.floor(this.counter/(Tetris.FLASH_DURATION/4));
+      
+      if (this.explodeAnimation) {
+          this.state = Math.abs(this.state - 3);
+      }
+  };
+
+	Tetris.Block.prototype.getSprite = function(){
+    	switch(this.color) {
+        case 0:
+          return Tetris.bgBlock;
+        case 1:
+        	return Tetris.LBlocks[this.state];
+        case 2:
+        	return Tetris.JBlocks[this.state];
+        case 3:
+        	return Tetris.LineBlocks[this.state];
+        case 4:
+        	return Tetris.SBlocks[this.state];
+        case 5:
+        	return Tetris.ZBlocks[this.state];
+        case 6:
+        	return Tetris.SquareBlocks[this.state];
+        case 7:
+        	return Tetris.TBlocks[this.state];
+        case 9:
+          return Tetris.borderBlock;
+        default:
+          return Tetris.bgBlock;
+    	}
+	};
+
+	Tetris.Block.prototype.getRandomColor = function() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+	}
+})();
